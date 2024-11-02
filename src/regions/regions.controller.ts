@@ -1,4 +1,12 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
+import { RegionsService } from './regions.service';
 
 @Controller('regions')
-export class RegionsController {}
+export class RegionsController {
+    constructor(private regionsServie: RegionsService) {}
+
+    @Get()
+    async find() {
+        return await this.regionsServie.find();
+    }
+}
