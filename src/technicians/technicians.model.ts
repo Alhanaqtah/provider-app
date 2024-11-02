@@ -1,6 +1,6 @@
 import { Region } from "src/regions/regions.model";
 import { Specialization } from "src/specializations/specializations.model";
-import { Column, Entity, JoinColumn, JoinTable, ManyToMany, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity({name: 'technicians'})
 export class Technician {
@@ -19,11 +19,11 @@ export class Technician {
     @Column({unique: true})
     phone_number: string;
 
-    @OneToOne(() => Specialization)
-    @JoinColumn({name: 'specialization_id'})
-    specialization: Specialization; 
+    @ManyToOne(() => Specialization)
+    @JoinColumn({ name: 'specialization_id' })
+    specialization: Specialization;
 
-    @ManyToMany(() => Region, region => region.technicians)
-    @JoinTable({name: 'technicians_regions', joinColumn: {name: 'technician_id'}, inverseJoinColumn: {name: 'region_id'}})
-    regions: Region[];
+    @ManyToOne(() => Region)
+    @JoinColumn({ name: 'region_id' })
+    region: Region;
 }
