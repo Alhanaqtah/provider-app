@@ -1,5 +1,5 @@
 import { Technician } from "src/technicians/technicians.model";
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinTable, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity({name: 'regions'})
 export class Region {
@@ -9,6 +9,6 @@ export class Region {
     @Column({unique: true})
     name: string;
 
-    @ManyToOne(() => Technician, technician => technician.regions)
-    technician: Technician;
+    @ManyToMany(() => Technician, technician => technician.regions)
+    technicians: Technician[];
 }

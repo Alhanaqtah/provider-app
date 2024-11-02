@@ -1,5 +1,6 @@
+import { Request } from "src/requests/requests.model";
 import { Tarif } from "src/tarifs/tarifs.model";
-import { Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity({name: 'clients'})
 export class Client {
@@ -24,4 +25,7 @@ export class Client {
     @ManyToMany(() => Tarif, tarif => tarif.clients)
     @JoinTable({name: 'clients_tarifs', joinColumn: {name: 'client_id'}, inverseJoinColumn: {name: 'tarif_id'}})
     tarifs: Tarif[];
+
+    @OneToMany(() => Request, request => request.client)
+    requests: Request[];
 }

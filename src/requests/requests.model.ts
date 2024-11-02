@@ -1,6 +1,7 @@
+import { Client } from "src/clients/clients.model";
 import { Status } from "src/statuses/statuses.model";
 import { Technician } from "src/technicians/technicians.model";
-import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity({name: 'requests'})
 export class Request {
@@ -23,4 +24,8 @@ export class Request {
   @OneToOne(() => Status)
   @JoinColumn({name: 'status_id'})
   status: Status;
+
+  @ManyToOne(() => Client, client => client.requests)
+  @JoinColumn({name: 'client_id'})
+  client: Client;
 }
