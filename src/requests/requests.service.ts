@@ -17,7 +17,11 @@ export class RequestsService {
     ) {}
 
     async findAll() {
-        return await this.requestRepo.find();
+        return await this.requestRepo.find({relations: ['status', 'technician'], order: {requested_at: 'DESC'}});
+    }
+
+    async find(id: number) {
+        return await this.requestRepo.findOneBy({id: id})
     }
 
     async update(id: number, t: {technician: string}) {

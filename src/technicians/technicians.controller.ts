@@ -1,6 +1,5 @@
 import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
 import { TechniciansService } from './technicians.service';
-import { Technician } from './technicians.model';
 
 @Controller('technicians')
 export class TechniciansController {

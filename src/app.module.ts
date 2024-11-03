@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { RequestsModule } from './requests/requests.module';
 import { TarifsModule } from './tarifs/tarifs.module';
 import { TechniciansModule } from './technicians/technicians.module';
@@ -16,6 +15,8 @@ import { Specialization } from './specializations/specializations.model';
 import { Technician } from './technicians/technicians.model';
 import { Tarif } from './tarifs/tarifs.model';
 import { Client } from './clients/clients.model';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -36,9 +37,12 @@ import { Client } from './clients/clients.model';
       entities: [Request, Status, Region, Specialization, Technician, Tarif, Client],
       synchronize: true,
       autoLoadEntities: true
-    })
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'static'),
+      serveRoot: '/'
+    }),
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [AppController]
 })
 export class AppModule {}
