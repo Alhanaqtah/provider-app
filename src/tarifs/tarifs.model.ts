@@ -1,5 +1,5 @@
 import { Client } from "src/clients/clients.model";
-import { Column, Entity, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity({name: 'tarifs'})
 export class Tarif {
@@ -15,6 +15,6 @@ export class Tarif {
     @Column()
     description: string;
 
-    @ManyToOne(() => Client, client => client.tarif)
+    @OneToMany(() => Client, client => client.tarif)
     clients: Client[];
 }

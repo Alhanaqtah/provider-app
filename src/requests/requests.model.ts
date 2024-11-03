@@ -17,12 +17,10 @@ export class Request {
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   requested_at: Date;
 
-  @OneToOne(() => Technician)
-  @JoinColumn({name: 'technician_id'})
+  @ManyToOne(() => Technician, technician => technician.requests, {nullable: true})
   technician: Technician;
 
-  @OneToOne(() => Status)
-  @JoinColumn({name: 'status_id'})
+  @ManyToOne(() => Status, status => status.requests)
   status: Status;
 
   @ManyToOne(() => Client, client => client.requests)

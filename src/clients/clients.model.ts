@@ -23,7 +23,6 @@ export class Client {
     address: string;
 
     @ManyToOne(() => Tarif, tarif => tarif.clients)
-    // @JoinColumn({name: 'tarif_id'})
     tarif: Tarif;
 
     @OneToMany(() => Request, request => request.client)

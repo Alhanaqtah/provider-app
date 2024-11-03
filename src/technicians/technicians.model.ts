@@ -1,6 +1,7 @@
 import { Region } from "src/regions/regions.model";
+import { Request } from "src/requests/requests.model";
 import { Specialization } from "src/specializations/specializations.model";
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity({name: 'technicians'})
 export class Technician {
@@ -26,4 +27,7 @@ export class Technician {
     @ManyToOne(() => Region)
     @JoinColumn({ name: 'region_id' })
     region: Region;
+
+    @OneToMany(() => Request, request => request.technician)
+    requests: Request[];
 }
