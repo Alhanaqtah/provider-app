@@ -6,7 +6,6 @@
     <title>Техники</title>
     <link rel="stylesheet" href="styles.css">
     <style>
-
         .modal-content input, .modal-content select {
             width: 100%;
             padding: 10px;
@@ -25,7 +24,7 @@
                 <li><a href="requests.html">Заявки</a></li>
                 <li><a href="/tarifs">Тарифы</a></li>
                 <li><a href="#">Техники</a></li>
-                <li><a href="/clients">Клиенты</a></li>
+                <li><a href="clients.html">Клиенты</a></li>
                 <li><a href="/help">Помощь</a></li>
             </ul>
         </nav>
@@ -58,7 +57,7 @@
     <!-- Модальное окно -->
     <div class="modal" id="addTechnicianModal">
         <div class="modal-content">
-            <h2>Новый техник</h2>
+            <h2 id="modal-title">Новый техник</h2>
             <input type="text" id="technician-surname" placeholder="Фамилия">
             <input type="text" id="technician-name" placeholder="Имя">
             <input type="text" id="technician-patronymic" placeholder="Отчество">
@@ -71,12 +70,15 @@
             </select>
             <div class="modal-buttons">
                 <button class="cancel-btn" onclick="closeAddTechnicianModal()">Отменить</button>
-                <button class="submit-btn" onclick="addTechnician()">Добавить</button>
+                <button class="submit-btn" id="modal-submit-btn" onclick="saveTechnician()">Добавить</button>
             </div>
         </div>
     </div>
 
     <script>
+        let editMode = false;
+        let editTechnicianId = null;
+
         async function loadTechnicians() {
             const response = await fetch('/technicians');
             const technicians = await response.json();
@@ -89,12 +91,12 @@
                     <td>${t.specialization?.value || 'Не указана'}</td>
                     <td>${t.phone_number || 'Не указан'}</td>
                     <td>${t.region?.name || 'Не указан'}</td>`;
+                row.onclick = () => openEditTechnicianModal(t);
                 tableBody.appendChild(row);
             });
         }
 
         async function loadDropdowns() {
-            // Загрузка специализаций
             const specializationResponse = await fetch('/specializations');
             const specializations = await specializationResponse.json();
             const specializationSelect = document.getElementById('technician-specialization');
@@ -105,7 +107,6 @@
                 specializationSelect.appendChild(option);
             });
 
-            // Загрузка регионов
             const regionResponse = await fetch('/regions');
             const regions = await regionResponse.json();
             const regionSelect = document.getElementById('technician-region');
@@ -118,6 +119,27 @@
         }
 
         function openAddTechnicianModal() {
+            editMode = false;
+            editTechnicianId = null;
+            document.getElementById('modal-title').innerText = 'Новый техник';
+            document.getElementById('modal-submit-btn').innerText = 'Добавить';
+            clearModalFields();
+            document.getElementById('addTechnicianModal').style.display = 'flex';
+        }
+
+        function openEditTechnicianModal(technician) {
+            editMode = true;
+            editTechnicianId = technician.id;
+            document.getElementById('modal-title').innerText = 'Редактировать техника';
+            document.getElementById('modal-submit-btn').innerText = 'Сохранить';
+
+            document.getElementById('technician-surname').value = technician.surname;
+            document.getElementById('technician-name').value = technician.name;
+            document.getElementById('technician-patronymic').value = technician.patronymic;
+            document.getElementById('technician-specialization').value = technician.specialization?.value || '';
+            document.getElementById('technician-phone').value = technician.phone_number;
+            document.getElementById('technician-region').value = technician.region?.name || '';
+
             document.getElementById('addTechnicianModal').style.display = 'flex';
         }
 
@@ -125,7 +147,16 @@
             document.getElementById('addTechnicianModal').style.display = 'none';
         }
 
-        async function addTechnician() {
+        function clearModalFields() {
+            document.getElementById('technician-surname').value = '';
+            document.getElementById('technician-name').value = '';
+            document.getElementById('technician-patronymic').value = '';
+            document.getElementById('technician-specialization').value = '';
+            document.getElementById('technician-phone').value = '';
+            document.getElementById('technician-region').value = '';
+        }
+
+        async function saveTechnician() {
             const surname = document.getElementById('technician-surname').value;
             const name = document.getElementById('technician-name').value;
             const patronymic = document.getElementById('technician-patronymic').value;
@@ -133,25 +164,39 @@
             const phone_number = document.getElementById('technician-phone').value;
             const region = document.getElementById('technician-region').value;
 
-            // Отправка данных на сервер
-            const response = await fetch('/technicians', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ surname, name, patronymic, phone_number, specialization, region })
-            });
+            if (editMode) {
+                const response = await fetch(`/technicians/${editTechnicianId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: editTechnicianId, surname, name, patronymic, phone_number, specialization, region })
+                });
 
-            if (response.ok) {
-                alert('Техник успешно добавлен');
-                closeAddTechnicianModal();
-                loadTechnicians(); // обновление таблицы
+                if (response.ok) {
+                    alert('Данные техника обновлены');
+                } else {
+                    alert('Ошибка при обновлении данных техника');
+                }
             } else {
-                alert('Ошибка при добавлении техника');
+                const response = await fetch('/technicians', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ surname, name, patronymic, phone_number, specialization, region })
+                });
+
+                if (response.ok) {
+                    alert('Техник успешно добавлен');
+                } else {
+                    alert('Ошибка при добавлении техника');
+                }
             }
+
+            closeAddTechnicianModal();
+            loadTechnicians();
         }
 
         window.addEventListener('load', () => {
             loadTechnicians();
-            loadDropdowns(); // загрузка данных для выпадающих списков
+            loadDropdowns();
         });
     </script>
 </body>
