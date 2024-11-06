@@ -41,7 +41,7 @@ export class TechniciansService {
     }
 
     async findAll() {
-        return await this.technicianRepo.find({relations: ['specialization']});
+        return await this.technicianRepo.find({relations: ['specialization', 'region']});
     }
 
     async find(id: number) {

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Техники</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+
+        .modal-content input, .modal-content select {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: none;
+            border-radius: 20px;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header с навигацией -->
+    <header class="header">
+        <nav>
+            <ul>
+                <li><a href="requests.html">Заявки</a></li>
+                <li><a href="/tarifs">Тарифы</a></li>
+                <li><a href="#">Техники</a></li>
+                <li><a href="/clients">Клиенты</a></li>
+                <li><a href="/help">Помощь</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Основной заголовок страницы -->
+    <main>
+        <h1>Техники</h1>
+
+        <!-- Таблица с горизонтальным скроллом -->
+        <div class="table-container">
+            <table id="technicians-table">
+                <thead>
+                    <tr>
+                        <th>ФИО</th>
+                        <th>Специализация</th>
+                        <th>Контакты</th>
+                        <th>Регион</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- Кнопка "Добавить техника" -->
+    <button class="add-technician-btn" onclick="openAddTechnicianModal()">Добавить техника</button>
+
+    <!-- Модальное окно -->
+    <div class="modal" id="addTechnicianModal">
+        <div class="modal-content">
+            <h2>Новый техник</h2>
+            <input type="text" id="technician-surname" placeholder="Фамилия">
+            <input type="text" id="technician-name" placeholder="Имя">
+            <input type="text" id="technician-patronymic" placeholder="Отчество">
+            <select class="custom-select" id="technician-specialization">
+                <option value="">Выбрать специализацию</option>
+            </select>
+            <input type="text" id="technician-phone" placeholder="Номер телефона">
+            <select class="custom-select" id="technician-region">
+                <option value="">Выбрать регион</option>
+            </select>
+            <div class="modal-buttons">
+                <button class="cancel-btn" onclick="closeAddTechnicianModal()">Отменить</button>
+                <button class="submit-btn" onclick="addTechnician()">Добавить</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function loadTechnicians() {
+            const response = await fetch('/technicians');
+            const technicians = await response.json();
+            const tableBody = document.getElementById('table-body');
+            tableBody.innerHTML = '';
+            technicians.forEach((t) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${t.surname} ${t.name} ${t.patronymic}</td>
+                    <td>${t.specialization?.value || 'Не указана'}</td>
+                    <td>${t.phone_number || 'Не указан'}</td>
+                    <td>${t.region?.name || 'Не указан'}</td>`;
+                tableBody.appendChild(row);
+            });
+        }
+
+        async function loadDropdowns() {
+            // Загрузка специализаций
+            const specializationResponse = await fetch('/specializations');
+            const specializations = await specializationResponse.json();
+            const specializationSelect = document.getElementById('technician-specialization');
+            specializations.forEach(specialization => {
+                const option = document.createElement('option');
+                option.value = specialization.value;
+                option.textContent = specialization.value;
+                specializationSelect.appendChild(option);
+            });
+
+            // Загрузка регионов
+            const regionResponse = await fetch('/regions');
+            const regions = await regionResponse.json();
+            const regionSelect = document.getElementById('technician-region');
+            regions.forEach(region => {
+                const option = document.createElement('option');
+                option.value = region.name;
+                option.textContent = region.name;
+                regionSelect.appendChild(option);
+            });
+        }
+
+        function openAddTechnicianModal() {
+            document.getElementById('addTechnicianModal').style.display = 'flex';
+        }
+
+        function closeAddTechnicianModal() {
+            document.getElementById('addTechnicianModal').style.display = 'none';
+        }
+
+        async function addTechnician() {
+            const surname = document.getElementById('technician-surname').value;
+            const name = document.getElementById('technician-name').value;
+            const patronymic = document.getElementById('technician-patronymic').value;
+            const specialization = document.getElementById('technician-specialization').value;
+            const phone_number = document.getElementById('technician-phone').value;
+            const region = document.getElementById('technician-region').value;
+
+            // Отправка данных на сервер
+            const response = await fetch('/technicians', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ surname, name, patronymic, phone_number, specialization, region })
+            });
+
+            if (response.ok) {
+                alert('Техник успешно добавлен');
+                closeAddTechnicianModal();
+                loadTechnicians(); // обновление таблицы
+            } else {
+                alert('Ошибка при добавлении техника');
+            }
+        }
+
+        window.addEventListener('load', () => {
+            loadTechnicians();
+            loadDropdowns(); // загрузка данных для выпадающих списков
+        });
+    </script>
+</body>
+</html>
