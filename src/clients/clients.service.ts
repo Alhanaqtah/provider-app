@@ -37,6 +37,7 @@ export class ClientsService {
         return await this.clientRepo.find({
             skip: skip,
             take: limit,
+            relations: ['tarif']
         });
     }
 

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Клиенты</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .modal-content input, .modal-content select {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: none;
+            border-radius: 20px;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header с навигацией -->
+    <header class="header">
+        <nav>
+            <ul>
+                <li><a href="requests.html">Заявки</a></li>
+                <li><a href="/tarifs">Тарифы</a></li>
+                <li><a href="clients.html">Клиенты</a></li>
+                <li><a href="#">Клиенты</a></li>
+                <li><a href="/help">Помощь</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Основной заголовок страницы -->
+    <main>
+        <h1>Клиенты</h1>
+
+        <!-- Таблица с горизонтальным скроллом -->
+        <div class="table-container">
+            <table id="clients-table">
+                <thead>
+                    <tr>
+                        <th>ФИО</th>
+                        <th>Тариф</th>
+                        <th>Контакты</th>
+                        <th>Адрес</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- Кнопка "Добавить клиента" -->
+    <button class="add-client-btn" onclick="openAddClientModal()">Добавить клиента</button>
+
+    <!-- Модальное окно -->
+    <div class="modal" id="addClientModal">
+        <div class="modal-content">
+            <h2 id="modal-title">Новый клиент</h2>
+            <input type="text" id="client-surname" placeholder="Фамилия">
+            <input type="text" id="client-name" placeholder="Имя">
+            <input type="text" id="client-patronymic" placeholder="Отчество">
+            <select class="custom-select" id="client-tarif">
+                <option value="">Тариф</option>
+            </select>
+            <input type="text" id="client-phone" placeholder="Номер телефона">
+            <input type="text" id="client-address" placeholder="Адрес">
+            <div class="modal-buttons">
+                <button class="cancel-btn" onclick="closeAddClientModal()">Отменить</button>
+                <button class="submit-btn" id="modal-submit-btn" onclick="saveClient()">Добавить</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let editMode = false;
+        let editClientId = null;
+
+        async function loadClients() {
+            const response = await fetch('/clients');
+            const clients = await response.json();
+            const tableBody = document.getElementById('table-body');
+            tableBody.innerHTML = '';
+            clients.forEach((c) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${c.surname} ${c.name} ${c.patronymic}</td>
+                    <td>${c.tarif?.title || 'Не указана'}</td>
+                    <td>${c.phone_number || 'Не указан'}</td>
+                    <td>${c.address || 'Не указан'}</td>
+                `;
+                row.onclick = () => openEditClientModal(c);
+                tableBody.appendChild(row);
+            });
+        }
+
+        async function loadDropdowns() {
+            const tarifsResponse = await fetch('/tarifs');
+            const tarifs = await tarifsResponse.json();
+            const tarifSelect = document.getElementById('client-tarif');
+            tarifSelect.innerHTML = '<option value="">Тариф</option>';
+            tarifs.forEach(tarif => {
+                const option = document.createElement('option');
+                option.value = tarif.title;  // Используем название тарифа в качестве значения
+                option.textContent = `${tarif.title} - ${tarif.cost} руб.`;
+                tarifSelect.appendChild(option);
+            });
+        }
+
+        function openAddClientModal() {
+            editMode = false;
+            editClientId = null;
+            document.getElementById('modal-title').innerText = 'Новый клиент';
+            document.getElementById('modal-submit-btn').innerText = 'Добавить';
+            clearModalFields();
+            document.getElementById('addClientModal').style.display = 'flex';
+        }
+
+        function openEditClientModal(client) {
+            editMode = true;
+            editClientId = client.id;
+            document.getElementById('modal-title').innerText = 'Редактировать клиента';
+            document.getElementById('modal-submit-btn').innerText = 'Сохранить';
+
+            document.getElementById('client-surname').value = client.surname || '';
+            document.getElementById('client-name').value = client.name || '';
+            document.getElementById('client-patronymic').value = client.patronymic || '';
+            document.getElementById('client-tarif').value = client.tarif?.value || '';
+            document.getElementById('client-phone').value = client.phone_number || '';
+            document.getElementById('client-address').value = client.address || '';
+
+            document.getElementById('addClientModal').style.display = 'flex';
+        }
+
+        function closeAddClientModal() {
+            document.getElementById('addClientModal').style.display = 'none';
+        }
+
+        function clearModalFields() {
+            document.getElementById('client-surname').value = '';
+            document.getElementById('client-name').value = '';
+            document.getElementById('client-patronymic').value = '';
+            document.getElementById('client-tarif').value = '';
+            document.getElementById('client-phone').value = '';
+            document.getElementById('client-address').value = '';
+        }
+
+        async function saveClient() {
+            const surname = document.getElementById('client-surname').value;
+            const name = document.getElementById('client-name').value;
+            const patronymic = document.getElementById('client-patronymic').value;
+            const tarif = document.getElementById('client-tarif').value;
+            const phone_number = document.getElementById('client-phone').value;
+            const address = document.getElementById('client-address').value;
+
+            const requestData = {
+                surname,
+                name,
+                patronymic,
+                phone_number,
+                tarif,
+                address
+            };
+
+            const url = editMode ? `/clients/${editClientId}` : '/clients';
+            const method = editMode ? 'PUT' : 'POST';
+            const response = await fetch(url, {
+                method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(requestData)
+            });
+
+            if (response.ok) {
+                alert(editMode ? 'Данные клиента обновлены' : 'Клиент успешно добавлен');
+            } else {
+                alert(editMode ? 'Ошибка при обновлении данных клиента' : 'Ошибка при добавлении клиента');
+            }
+
+            closeAddClientModal();
+            loadClients();
+        }
+
+        window.addEventListener('load', () => {
+            loadClients();
+            loadDropdowns();
+        });
+    </script>
+</body>
+</html>

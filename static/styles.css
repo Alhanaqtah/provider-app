@@ -134,7 +134,7 @@ tr:hover {
     border-radius: 30px;
 }
 
-.modal-content h3 {
+.modal-content h2, h3 {
     margin: 10px 0px;
     background-color: #E8F3FF;
     padding: 20px;
@@ -204,12 +204,12 @@ button {
     color: #888;
 }
 
-.add-technician-btn {
+.add-technician-btn, .add-client-btn {
     background-color: #FFC64D;
     position: fixed;
     bottom: 20px;
     right: 20px;
-    width: 180px;
+    width: 220px;
     height: 50px;
     padding: 10px 20px;
     font-size: 16px;
