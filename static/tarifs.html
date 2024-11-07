@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тарифы</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- Подключение Font Awesome для иконок -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        .tariff-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .tariff-card {
+            background-color: #E8F3FF;
+            border-radius: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            width: 300px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .tariff-card .save-btn, .tariff-card .delete-btn {
+            background-color: #f44336;
+        }
+
+        .tariff-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .tariff-card h3 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .tariff-card p {
+            font-size: 18px;
+            color: #555;
+            margin: 10px 0;
+        }
+
+        .tariff-card .price {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007BFF;
+        }
+
+        .add-tariff-btn {
+            background-color: #FFC64D;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 220px;
+            height: 50px;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #333;
+            border: none;
+            border-radius: 100px;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.3s;
+        }
+
+        /* Модальное окно */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #E8F3FF;
+            padding: 20px;
+            border-radius: 20px;
+            width: 500px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-content h2 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .modal-content input,
+        .modal-content textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 20px;
+            background-color: #C5E3FF;
+            border: none;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        .modal-content textarea {
+            height: 100px;
+            resize: none;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .cancel-btn,
+        .submit-btn {
+            padding: 10px 20px;
+            font-size: 16px;
+            width: 180px;
+            height: 50px;
+            border-radius: 100px;
+            cursor: pointer;
+            border: none;
+        }
+
+        .cancel-btn {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .submit-btn {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .modal-buttons button:hover {
+            opacity: 0.8;
+        }
+
+        /* Стиль для кнопок редактирования и удаления */
+        .edit-delete-btns {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .edit-delete-btns button {
+            background-color: #FFC64D;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            transition: color 0.3s;
+            color: #333;
+        }
+
+        .edit-delete-btns button:hover {
+            color: #555555;
+        }
+
+        /* Стиль для кнопки удаления */
+        .delete-btn {
+            color: #f44336; /* Красный цвет для кнопки удаления */
+        }
+
+        /* Стиль для кнопки редактирования */
+        .edit-btn {
+            color: #FFC64D; /* Желтый цвет для кнопки редактирования */
+        }
+    </style>
+</head>
+<body>
+    <!-- Header с навигацией -->
+    <header class="header">
+        <nav>
+            <ul>
+                <li><a href="requests.html">Заявки</a></li>
+                <li><a href="/tarifs">Тарифы</a></li>
+                <li><a href="clients.html">Клиенты</a></li>
+                <li><a href="#">Клиенты</a></li>
+                <li><a href="/help">Помощь</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Основной заголовок страницы -->
+    <main>
+        <h1>Тарифы</h1>
+
+        <!-- Контейнер для карточек тарифов -->
+        <div class="tariff-container" id="tariff-container">
+            <!-- Карточки тарифов будут загружаться здесь -->
+        </div>
+    </main>
+
+    <!-- Кнопка "Добавить тариф" -->
+    <button class="add-tariff-btn" onclick="openAddTariffModal()">Добавить тариф</button>
+
+    <!-- Модальное окно добавления и редактирования тарифа -->
+    <div class="modal" id="addTariffModal">
+        <div class="modal-content">
+            <h2 id="modalTitle">Новый тариф</h2>
+            <input type="text" id="tariff-title" placeholder="Название тарифа">
+            <input type="number" id="tariff-price" placeholder="Стоимость">
+            <textarea id="tariff-description" placeholder="Описание тарифа"></textarea>
+            <div class="modal-buttons">
+                <button class="cancel-btn" onclick="closeAddTariffModal()">Отменить</button>
+                <button class="submit-btn" onclick="saveTariff()">Добавить</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let editingTariffId = null;
+
+        async function loadTariffs() {
+            const response = await fetch('/tarifs');
+            const tarifs = await response.json();
+            const container = document.getElementById('tariff-container');
+            container.innerHTML = '';
+            tarifs.forEach((tarif) => {
+                const card = document.createElement('div');
+                card.className = 'tariff-card';
+                card.innerHTML = `
+                    <h3>${tarif.title}</h3>
+                    <p class="price">${tarif.cost} руб.</p>
+                    <p>${tarif.description || 'Описание отсутствует'}</p>
+                    <div class="edit-delete-btns">
+                        <button class="delete-btn" onclick="deleteTariff(${tarif.id})">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                        <button class="edit-btn" onclick="openEditTariffModal(${tarif.id}, '${tarif.title}', ${tarif.cost}, '${tarif.description}')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function openAddTariffModal() {
+            editingTariffId = null;
+            document.getElementById('modalTitle').textContent = 'Новый тариф';
+            document.getElementById('tariff-title').value = '';
+            document.getElementById('tariff-price').value = '';
+            document.getElementById('tariff-description').value = '';
+            document.getElementById('addTariffModal').style.display = 'flex';
+        }
+
+        function openEditTariffModal(id, title, cost, description) {
+            editingTariffId = id;
+            document.getElementById('modalTitle').textContent = 'Редактировать тариф';
+            document.getElementById('tariff-title').value = title;
+            document.getElementById('tariff-price').value = cost;
+            document.getElementById('tariff-description').value = description;
+            document.getElementById('addTariffModal').style.display = 'flex';
+        }
+
+        function closeAddTariffModal() {
+            document.getElementById('addTariffModal').style.display = 'none';
+        }
+
+        async function saveTariff() {
+            const title = document.getElementById('tariff-title').value;
+            const price = document.getElementById('tariff-price').value;
+            const description = document.getElementById('tariff-description').value;
+
+            if (!title || !price) {
+                alert('Заполните все обязательные поля!');
+                return;
+            }
+
+            const method = editingTariffId ? 'PUT' : 'POST';
+            const url = editingTariffId ? `/tarifs/${editingTariffId}` : '/tarifs';
+            const body = JSON.stringify({ title, cost: price, description });
+
+            const response = await fetch(url, {
+                method,
+                headers: { 'Content-Type': 'application/json' },
+                body,
+            });
+
+            if (response.ok) {
+                alert(editingTariffId ? 'Тариф обновлен' : 'Тариф добавлен');
+                loadTariffs();
+                closeAddTariffModal();
+            } else {
+                alert('Ошибка при сохранении тарифа');
+            }
+        }
+
+        async function deleteTariff(id) {
+            const response = await fetch(`/tarifs/${id}`, {
+                method: 'DELETE'
+            });
+
+            if (response.ok) {
+                alert('Тариф успешно удален');
+                loadTariffs();
+            } else {
+                alert('Ошибка при удалении тарифа');
+            }
+        }
+
+        // Загружаем тарифы при загрузке страницы
+        loadTariffs();
+    </script>
+</body>
+</html>
